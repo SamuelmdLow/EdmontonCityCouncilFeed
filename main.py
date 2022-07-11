@@ -13,7 +13,7 @@ def getHtml(url):
 
     return html
 
-def getElems(start, end, html):
+def getElemValue(start, end, html):
     startLen = len(start)
     endLen = len(end)
 
@@ -29,11 +29,11 @@ def getElems(start, end, html):
 
                 hasStart = True
                 opened = 0
-                elemStart = char
+                elemStart = char + startLen
         else:
             if html[char:char + endLen] == end and opened == 0:
                 #print("element found!")
-                elems.append(html[elemStart:char+endLen])
+                elems.append(html[elemStart:char])
                 hasStart = False
             if html[char] == '<':
                 if html[char:char+2] == '</':
@@ -53,8 +53,67 @@ def checkMotion(elems):
 
     return important
 
-def getElemValue(html):
-    pass
+def getElems(html):
+    elems = getElemValue('<', '</', html)
+    #print(elems)
+    #print(len(elems))
+    if len(elems) == 0:
+        return html
+    else:
+        newElems = []
+        for elem in elems:
+            #print(elem)
+            newElems.append(getElems(elem))
+        return newElems
+
+def penetrate(value):
+    while isinstance(value, list):
+        value = value[0]
+    return value
+
+def cleanText(text):
+    if ">" in text:
+        return text[text.index(">")+1:len(text)]
+    return text
+
+class motion():
+    def __init__(self):
+        self.name = ""
+        self.movedBy = ""
+        self.secondedBy = ""
+        self.desc = ""
+        self.inFavour = ""
+        self.opposed = ""
+        self.carried = False
+
+    def createMotion(self, info):
+
+        self.movedBy = cleanText(info[2][1])
+        self.secondedBy = cleanText(info[3][1])
+        self.name = cleanText(penetrate(info[4][0]))
+        self.desc = cleanText(info[4][1][0])
+
+        if len(info[4]) == 3:
+            self.desc = self.desc + " " + cleanText(info[4][2][0])
+
+        self.inFavour = cleanText(info[5][0][1])
+        self.opposed = cleanText(info[5][1][1])
+        if "carried" in cleanText(info[6]).lower():
+            self.carried = True
+        else:
+            self.carried = False
+
+    def output(self):
+        print("Motion: " + self.name)
+        print("Moved by: " + self.movedBy)
+        print("Seconded By: " + self.secondedBy)
+        print("Description: " + self.desc)
+        print("In Favour: " + self.inFavour)
+        print("Opposed: " + self.opposed)
+        if self.carried:
+            print("Carried")
+        else:
+            print("Defeated")
 
 if __name__ == "__main__":
 
@@ -64,9 +123,17 @@ if __name__ == "__main__":
     file.write(html)
     file.close()
 
-    elems = getElems("<LI class='AgendaItemMotion' >", "</LI>", html)
+    elems = getElemValue("<LI class='AgendaItemMotion' >", "</LI>", html)
 
     elems = checkMotion(elems)
 
+    motions = []
     for elem in elems:
-        print(elem)
+        info = getElems(elem)
+        newMotion = motion()
+        newMotion.createMotion(info)
+        motions.append(newMotion)
+
+    for motion in motions:
+        motion.output()
+        print("\n")
