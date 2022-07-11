@@ -1,6 +1,6 @@
 # Edmonton City Council Feed
 
-## Goal 1
+## Goal 1 (met)
 Parse information from an edmonton city council escribe meeting
 (ex. https://pub-edmonton.escribemeetings.com/Meeting.aspx?Agenda=PostMinutes&Id=90d0b4a6-47d2-47f1-a735-9076e5a89c0f&Item=19&Tab=attachments&lang=English)
 
@@ -71,5 +71,17 @@ Parse information from an edmonton city council escribe meeting
 3. Create an object for AgendaItems
 4. Get html of webpage
 5. Get all elements of class "AgendaItemMotion"
-6. If the first "MotionText" is in bold (`<p><span style="font-weight:400;"><span><strong>`), arrange it into this object
+6. Remove all elements that include "boring" terms
 7. Output information in all AgendaItems in text form
+
+## Goal 2
+Send requests for json files from their webserver
+
+### Plan
+1. Figure it out 💀 (does this help? https://stackoverflow.com/questions/31371166/reading-json-from-simplehttpserver-post-data)
+
+## Goal 3
+Create an RSS feed for the information
+
+## Goal 4
+Create a twitter bot for the information
