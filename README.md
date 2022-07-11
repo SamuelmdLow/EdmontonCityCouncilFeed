@@ -79,3 +79,9 @@ Send requests for json files from their webserver
 
 ### Plan
 1. Figure it out 💀 (does this help? https://stackoverflow.com/questions/31371166/reading-json-from-simplehttpserver-post-data)
+
+## Goal 3
+Create an RSS feed for the information
+
+## Goal 4
+Create a twitter bot for the information
