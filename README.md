@@ -71,7 +71,7 @@ Parse information from an edmonton city council escribe meeting
 3. Create an object for AgendaItems
 4. Get html of webpage
 5. Get all elements of class "AgendaItemMotion"
-6. If the first "MotionText" is in bold (`<p><span style="font-weight:400;"><span><strong>`), arrange it into this object
+6. Remove all elements that include "boring" terms
 7. Output information in all AgendaItems in text form
 
 ## Goal 2
