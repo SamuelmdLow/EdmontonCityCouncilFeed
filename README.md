@@ -74,11 +74,11 @@ Parse information from an edmonton city council escribe meeting
 6. Remove all elements that include "boring" terms
 7. Output information in all AgendaItems in text form
 
-## Goal 2
+## Goal 2 (met)
 Send requests for json files from their webserver
 
 ### Plan
-1. Figure it out 💀 (does this help? https://stackoverflow.com/questions/31371166/reading-json-from-simplehttpserver-post-data)
+1. Figure it out 💀 
 
 ## Goal 3
 Create an RSS feed for the information
