@@ -3,7 +3,127 @@ import urllib.request
 import requests
 from bs4 import BeautifulSoup
 import datetime
+import sqlite3
+import pathlib
 
+database = 'database.db'
+
+
+FIRST_RUN = True
+if (pathlib.Path.cwd() / database).exists():
+    FIRST_RUN = False
+
+con = sqlite3.connect(database)
+cur = con.cursor()
+
+def resetDatabase():
+    global con, cur
+
+    cur.execute('''
+    CREATE TABLE meetings(
+        name text,
+        ID text,
+        date text,
+        url text
+    );''')
+
+    cur.execute('''
+    CREATE TABLE agendas(
+        ID text,
+        text text
+    );''')
+
+    cur.execute('''
+    CREATE TABLE bylaws(
+        ID text,
+        name text,
+        text text
+    );''')
+
+    cur.execute('''
+    CREATE TABLE motion(
+        ID text,
+        movedBy text,
+        secondedBy text,
+        desc text,
+        inFavour integer,
+        opposed integer,
+        result text,
+        status integer
+    );''')
+
+    cur.execute('''
+    CREATE TABLE groups(
+        ID integer primary key,
+        people text
+    );''')
+
+    con.commit()
+
+def uploadMeeting(meeting):
+    global con, cur
+
+    if cur.execute("select ID from meetings where ID=?", [meeting.ID, ]).fetchone() != None:
+
+        cur.execute('''
+        INSERT INTO meetings
+            (name, ID, date, url)
+        values
+            (?,?,?,?)
+        ;''', [meeting.name, meeting.ID, meeting.date, meeting.url])
+
+        for item in meeting.agenda:
+            cur.execute('''
+            INSERT INTO agendas
+                (ID, text)
+            values
+                (?,?)
+            ;''', [meeting.ID, item])
+
+        for item in meeting.bylaws:
+            cur.execute('''
+            INSERT INTO bylaws
+                (ID, name, text)
+            values
+                (?,?,?)
+            ;''', [meeting.ID, item[0], item[1]])
+
+        for motion in meeting.motions:
+
+
+            inFavourID = cur.execute("select ID from groups where people=?", [motion.inFavour,]).fetchone()
+            if inFavourID == None:
+                cur.execute('''
+                INSERT INTO groups
+                    (people)
+                values
+                    (?);''', [motion.inFavour,])
+
+                con.commit()
+                inFavourID = cur.execute("select ID from groups where people=?", [motion.inFavour, ]).fetchone()
+
+            inFavourID = inFavourID[0]
+
+            opposedID = cur.execute("select ID from groups where people=?", [motion.opposed,]).fetchone()
+            if opposedID == None:
+                cur.execute('''
+                INSERT INTO groups
+                    (people)
+                values
+                    (?);''', [motion.opposed, ])
+
+                con.commit()
+                opposedID = cur.execute("select ID from groups where people=?", [motion.opposed, ]).fetchone()
+            opposedID = opposedID[0]
+
+            cur.execute('''
+            INSERT INTO bylaws
+                (ID, movedBy, secondedBy, desc, inFavour, opposed, result, status)
+            values
+                (?,?,?,?,?,?,?,?)
+            ;''', [meeting.ID, motion.movedBy, motion.secondedBy, motion.desc, inFavourID, opposedID, motion.result, motion.status])
+
+        con.commit()
 filename = "file.txt"
 
 class Meeting():
@@ -43,8 +163,8 @@ class motion():
         self.movedBy = ""
         self.secondedBy = ""
         self.desc = ""
-        self.inFavour = []
-        self.opposed = []
+        self.inFavour = ""
+        self.opposed = ""
         self.result = ""
         self.status = False
         self.url = ""
@@ -72,9 +192,9 @@ class motion():
 
             while len(votes) > 0:
                 if "In Favour" in votes[0][0]:
-                    self.inFavour = splitVoters(cleanText(votes[0][1]))
+                    self.inFavour = cleanText(votes[0][1])
                 elif "Opposed" in votes[0][0]:
-                    self.inFavour = splitVoters(cleanText(votes[0][1]))
+                    self.inFavour = cleanText(votes[0][1])
                 votes.pop(0)
 
         if "MotionResult" in info:
@@ -299,19 +419,26 @@ def getMonthMeetings():
     meetings = getMeetings(startDate, endDate)
     return meetings
 
+#def retrieveMeetingsFromDatabase():
+#    global cur, con
+#    rawMeetings = cur.execute("select * from meetings").fetchall()
+#    newMeetings = Meeting()
+
+if FIRST_RUN == True:
+    resetDatabase()
+
 if __name__ == "__main__":
 
     #file = open(filename, "w")
     #file.write(html)
     #file.close()
 
-    #meetings = getAllMeetings()
-    #for meeting in meetings:
-    #    meeting.output()
+    meetings = getMonthMeetings()
+    print("got meetings")
+    for meeting in meetings:
+        uploadMeeting(meeting)
 
     #motions = parseMotions("https://pub-edmonton.escribemeetings.com/Meeting.aspx?Id=ed3fc862-3398-4e59-97d5-69e4e9aee352&Agenda=PostMinutes&lang=English")
 
     #for motion in motions:
     #    motion.output()
-
-    print("hello"[0:3])

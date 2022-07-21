@@ -35,7 +35,7 @@
         <h3>Motions</h3>
         <ul>
         {% for motion in meeting.motions %}
-            <li><strong>{{motion.result}}: </strong> {{motion.desc|safe}}</li>
+            <li><strong>{{motion.result}}: </strong> <p>{{motion.desc|safe}}</p></li>
         {% endfor %}
         </ul>
     {% endif %}
