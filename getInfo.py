@@ -13,7 +13,7 @@ FIRST_RUN = True
 if (pathlib.Path.cwd() / database).exists():
     FIRST_RUN = False
 
-con = sqlite3.connect(database)
+con = sqlite3.connect(database, check_same_thread=False)
 cur = con.cursor()
 
 def resetDatabase():
@@ -41,7 +41,7 @@ def resetDatabase():
     );''')
 
     cur.execute('''
-    CREATE TABLE motion(
+    CREATE TABLE motions(
         ID text,
         movedBy text,
         secondedBy text,
@@ -63,7 +63,7 @@ def resetDatabase():
 def uploadMeeting(meeting):
     global con, cur
 
-    if cur.execute("select ID from meetings where ID=?", [meeting.ID, ]).fetchone() != None:
+    if cur.execute("select ID from meetings where ID=?", [meeting.ID, ]).fetchone() == None:
 
         cur.execute('''
         INSERT INTO meetings
@@ -117,17 +117,29 @@ def uploadMeeting(meeting):
             opposedID = opposedID[0]
 
             cur.execute('''
-            INSERT INTO bylaws
+            INSERT INTO motions
                 (ID, movedBy, secondedBy, desc, inFavour, opposed, result, status)
             values
                 (?,?,?,?,?,?,?,?)
             ;''', [meeting.ID, motion.movedBy, motion.secondedBy, motion.desc, inFavourID, opposedID, motion.result, motion.status])
 
         con.commit()
+
+    else:
+        print("oops")
 filename = "file.txt"
 
 class Meeting():
-    def __init__(self, name, ID, date):
+    def __init__(self):
+        self.name = ""
+        self.ID = ""
+        self.date = ""
+        self.url = ""
+        self.motions = []
+        self.agenda = []
+        self.bylaws = []
+
+    def creteFromParse(self, name, ID, date):
         self.name = name
         self.ID = ID
         self.date = date
@@ -145,6 +157,33 @@ class Meeting():
         self.agenda = filterInterest(self.agenda, terms, ["Bylaws"])
 
         self.bylaws, self.agenda = splitAgenda(self.agenda)
+
+    def createFromDatabase(self, raw):
+        global con, cur
+
+        self.name = raw[0]
+        self.ID = raw[1]
+        self.date = raw[2]
+        self.url = raw[3]
+
+        self.motions = []
+
+        rawMotions = cur.execute("select movedBy, secondedBy, desc, inFavour, opposed, result, status from motions where ID=?", [raw[1], ]).fetchall()
+
+        for rawMotion in rawMotions:
+            newMotion = motion()
+            newMotion.createFromDatabase(rawMotion)
+            self.motions.append(newMotion)
+
+        self.agenda = []
+        rawAgenda = cur.execute("select text from agendas where ID=?", [raw[1], ]).fetchall()
+        for rawItem in rawAgenda:
+            self.agenda.append(rawItem[0])
+
+        self.bylaws = []
+        rawBylaws = cur.execute("select name, text from bylaws where ID=?", [raw[1], ]).fetchall()
+        for rawBylaw in rawBylaws:
+            self.bylaws.append([rawBylaw[0], rawBylaw[1]])
 
     def output(self):
         print(self.name + " " + self.date)
@@ -169,7 +208,35 @@ class motion():
         self.status = False
         self.url = ""
 
-    def createMotion(self, info, url):
+    def createFromDatabase(self, data):
+        global con, cur
+
+        '''
+        ID text,
+        movedBy text,
+        secondedBy text,
+        desc text,
+        inFavour integer,
+        opposed integer,
+        result text,
+        status integer
+        :param data: 
+        :return: 
+        '''
+        self.movedBy = data[0]
+        self.secondedBy = data[1]
+        self.desc = data[2]
+        self.inFavour = cur.execute("select people from groups where ID = ?", [data[3],])
+        self.opposed = cur.execute("select people from groups where ID = ?", [data[4],])
+        self.result = data[5]
+        if data[6] == 1:
+            self.status = True
+        else:
+            self.status = False
+
+        self.url = ""
+
+    def createFromParse(self, info, url):
         self.url = url
 
         if "MovedBy" in info:
@@ -366,7 +433,7 @@ def parseMotions(url):
     for elem in elems:
         #info = getElems(elem)
         newMotion = motion()
-        newMotion.createMotion(elem, url)
+        newMotion.createFromParse(elem, url)
         motions.append(newMotion)
 
     #i = 0
@@ -389,7 +456,9 @@ def getMeetings(startDate, endDate):
 
     meetings = []
     for meeting in x['d']:
-        meetings.append(Meeting(meeting['MeetingName'], meeting['ID'], meeting['StartDate']))
+        newMeeting = Meeting()
+        newMeeting.creteFromParse(meeting['MeetingName'], meeting['ID'], meeting['StartDate'])
+        meetings.append(newMeeting)
 
     i = 0
     while i < len(meetings):
@@ -417,12 +486,38 @@ def getMonthMeetings():
     endDate = date.strftime("%Y") + "-" + date.strftime("%m") + "-" + date.strftime("%d")
 
     meetings = getMeetings(startDate, endDate)
+
+    for meeting in meetings:
+        uploadMeeting(meeting)
+
     return meetings
 
-#def retrieveMeetingsFromDatabase():
-#    global cur, con
-#    rawMeetings = cur.execute("select * from meetings").fetchall()
-#    newMeetings = Meeting()
+def retrieveMeetingsFromDatabase():
+    global con, cur
+
+    rawMeetings = cur.execute("select * from meetings").fetchall()
+    meetings = []
+
+    print(rawMeetings)
+
+    for raw in rawMeetings:
+
+        '''
+        movedBy text,
+        secondedBy text,
+        desc text,
+        inFavour integer,
+        opposed integer,
+        result text,
+        status integer'''
+
+        print(raw)
+
+        newMeeting = Meeting()
+        newMeeting.createFromDatabase(raw)
+        meetings.append(newMeeting)
+
+    return meetings
 
 if FIRST_RUN == True:
     resetDatabase()
@@ -433,12 +528,19 @@ if __name__ == "__main__":
     #file.write(html)
     #file.close()
 
-    meetings = getMonthMeetings()
-    print("got meetings")
-    for meeting in meetings:
-        uploadMeeting(meeting)
+    #meetings = getMonthMeetings()
+    #print("got meetings")
+    #for meeting in meetings:
+    #    uploadMeeting(meeting)
+
+    getMonthMeetings()
 
     #motions = parseMotions("https://pub-edmonton.escribemeetings.com/Meeting.aspx?Id=ed3fc862-3398-4e59-97d5-69e4e9aee352&Agenda=PostMinutes&lang=English")
 
     #for motion in motions:
     #    motion.output()
+
+    meetings = retrieveMeetingsFromDatabase()
+
+    for meeting in meetings:
+        meeting.output()

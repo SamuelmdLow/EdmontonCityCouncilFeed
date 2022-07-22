@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    meetings = getMonthMeetings()
+    meetings = retrieveMeetingsFromDatabase()
     return render_template("index.html", meetings=meetings)
 
 if __name__ == "__main__":
