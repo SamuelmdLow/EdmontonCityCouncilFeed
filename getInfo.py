@@ -250,7 +250,8 @@ class motion():
             self.secondedBy = None
 
         if "MotionText" in info:
-            self.desc = cleanText(getElemValue("<DIV class='MotionText RichText' >", "</DIV>", info)[0])
+            #self.desc = cleanText(getElemValue("<DIV class='MotionText RichText' >", "</DIV>", info)[0])
+            self.desc = getElemValue("<DIV class='MotionText RichText' >", "</DIV>", info)[0]
         else:
             self.desc = None
 

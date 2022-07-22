@@ -1,0 +1,65 @@
+meeting
+{
+    max-width: 500px;
+    padding: 2%;
+    display: block;
+}
+
+motion
+{
+    background-color: #ffffff;
+    display: block;
+    padding: 2%;
+}
+
+.hoverable:hover
+{
+    background-color: #dddddd;
+    cursor: pointer;
+}
+
+motionDesc
+{
+    margin: 3%;
+    display: block;
+}
+
+.bylawName
+{
+    width: 120px;
+}
+
+td {
+  vertical-align: top;
+}
+
+.indent
+{
+    margin-left: 20px;
+}
+
+.pad
+{
+    padding: 2%;
+}
+
+.hidden
+{
+    display:none;
+}
+
+.expandButton
+{
+    background-color: red;
+    border-radius: 20px;
+    display: block;
+    padding: 1px;
+    margin: 2px;
+    width: 10px;
+}
+
+.expandButton:hover
+{
+    background-color: pink;
+    cursor: pointer;
+}
