@@ -7,10 +7,10 @@ function toggle(that)
     //alert(sib[1]);
     if (sib[sib.length - 1] == "hidden")
     {
-        that.innerHTML = "-";
+        that.src = "https://upload.wikimedia.org/wikipedia/commons/3/32/VisualEditor_-_Icon_-_Collapse.svg";
     }
     else
     {
-        that.innerHTML = "+";
+        that.src = "https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg";
     }
 }

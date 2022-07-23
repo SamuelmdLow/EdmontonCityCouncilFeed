@@ -1,9 +1,22 @@
+body
+{
+    margin: 0;
+}
+
 meeting
 {
-    max-width: 500px;
     padding: 2%;
     display: block;
+    border-style: solid;
+    border-color: white;
 }
+
+meeting:hover
+{
+    border-style: solid;
+    border-color: gray;
+}
+
 
 motion
 {
@@ -50,16 +63,93 @@ td {
 
 .expandButton
 {
-    background-color: red;
-    border-radius: 20px;
     display: block;
     padding: 1px;
     margin: 2px;
-    width: 10px;
+    width: 20px;
+    height: 20px;
+    text-align: center;
 }
 
 .expandButton:hover
 {
-    background-color: pink;
+    background-color: #dddddd;
     cursor: pointer;
+}
+
+/* unvisited link */
+a:link {
+  color: black;
+}
+
+/* visited link */
+a:visited {
+  color: #909090;
+}
+
+/* mouse over link */
+a:hover {
+  color: #aaaaaa;
+}
+
+/* selected link */
+a:active {
+  color: black;
+}
+
+sidebar
+{
+    position: fixed;
+    width: 125px;
+    height: 120vh;
+    overflow: auto;
+    background-color: #003E7E;
+}
+
+info
+{
+    max-width: 700px;
+    padding-left: 150px;
+    padding-right: 25px;
+    display: block;
+}
+
+.sidebar-button
+{
+    background-color: #0e5084;
+    padding: 1%;
+    margin: auto;
+    margin-bottom: 7%;
+    border-radius: 5px;
+    color: white;
+    width: 70%;
+    text-align: center;
+    display: block;
+}
+
+.sidebar-button:hover
+{
+    background-color: #004070;
+    cursor: pointer;
+}
+
+/* unvisited link */
+a.sidebar-button:link {
+    text-decoration: none;
+    color: white;
+}
+
+/* visited link */
+a.sidebar-button:visited {
+  color: white;
+}
+
+/* mouse over link */
+a.sidebar-button:hover {
+  color: #1f6ead;
+}
+
+/* selected link */
+a.sidebar-button:active {
+  color: white;
 }

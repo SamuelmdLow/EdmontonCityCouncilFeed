@@ -24,7 +24,8 @@ def resetDatabase():
         name text,
         ID text,
         date text,
-        url text
+        url text,
+        year integer
     );''')
 
     cur.execute('''
@@ -58,6 +59,11 @@ def resetDatabase():
         people text
     );''')
 
+    cur.execute('''
+    CREATE TABLE years(
+        year integer
+    );''')
+
     con.commit()
 
 def uploadMeeting(meeting):
@@ -65,12 +71,20 @@ def uploadMeeting(meeting):
 
     if cur.execute("select ID from meetings where ID=?", [meeting.ID, ]).fetchone() == None:
 
+        if cur.execute("select year from years where year=?", [int(meeting.date[0:4]), ]).fetchone() == None:
+            cur.execute('''
+            INSERT INTO years
+                (year)
+            values
+                (?)
+            ;''', [meeting.date[0:4], ])
+
         cur.execute('''
         INSERT INTO meetings
-            (name, ID, date, url)
+            (name, ID, date, url, year)
         values
-            (?,?,?,?)
-        ;''', [meeting.name, meeting.ID, meeting.date, meeting.url])
+            (?,?,?,?,?)
+        ;''', [meeting.name, meeting.ID, meeting.date, meeting.url, int(meeting.date[0:4])])
 
         for item in meeting.agenda:
             cur.execute('''
@@ -493,10 +507,21 @@ def getMonthMeetings():
 
     return meetings
 
-def retrieveMeetingsFromDatabase():
+def getAllYears():
     global con, cur
 
-    rawMeetings = cur.execute("select * from meetings").fetchall()
+    rawYears = con.execute("select year from years order by year desc").fetchall()
+    years = []
+    for year in rawYears:
+        years.append(year[0])
+
+    return years
+
+def retrieveMeetingsFromDatabase(year):
+    global con, cur
+
+    rawMeetings = cur.execute("select * from meetings where year=? order by date desc", [year,]).fetchall()
+
     meetings = []
 
     print(rawMeetings)
@@ -522,6 +547,7 @@ def retrieveMeetingsFromDatabase():
 
 if FIRST_RUN == True:
     resetDatabase()
+    getMonthMeetings()
 
 if __name__ == "__main__":
 
@@ -536,12 +562,14 @@ if __name__ == "__main__":
 
     getMonthMeetings()
 
+    getAllYears()
+
     #motions = parseMotions("https://pub-edmonton.escribemeetings.com/Meeting.aspx?Id=ed3fc862-3398-4e59-97d5-69e4e9aee352&Agenda=PostMinutes&lang=English")
 
     #for motion in motions:
     #    motion.output()
 
-    meetings = retrieveMeetingsFromDatabase()
+    meetings = retrieveMeetingsFromDatabase(2022)
 
     for meeting in meetings:
         meeting.output()

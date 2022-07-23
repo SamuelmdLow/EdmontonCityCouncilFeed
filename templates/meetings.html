@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{url_for('static', filename='script.js')}}"></script>
+</head>
+<body>
+<sidebar>
+<img src="https://www.edmonton.ca/themes/coe_edmontonca/favicon.ico" width="80%" style="margin: 10%;">
+<a class="sidebar-button" href="/">Home</a>
+<a class="sidebar-button" href="/search">Search</a>
+<p style="margin-left: 15%; color: white; margin-block-end: 0.5em;">Years</p>
+{% for itemYear in years %}
+    <a class="sidebar-button" href="/{{itemYear}}">{{itemYear}}</a>
+{% endfor %}
+</sidebar>
+<info>
+    <div style="height:100%; overflow: auto;">
+    <h1>{{year}} Edmonton City Council Meetings</h1>
+    </div>
+{% for meeting in meetings %}
+    <meeting>
+    <a href="{{meeting.url}}"><h2>{{ meeting.name }}</h2></a>
+    <p>{{ meeting.date[5:10] }}</p>
+    <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg"><div class="pad">
+        {% if meeting.agenda|length > 0 %}
+        <h3>Agenda</h3>
+        <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg"><ul class="indent">
+            {% for item in meeting.agenda %}
+                <li class="pad hoverable">{{item}}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if meeting.bylaws|length > 0 %}
+        <h3>Bylaws</h3>
+        <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg"><table class="indent">
+            {% for bylaw in meeting.bylaws %}
+            <tr class="hoverable">
+                <td class="pad bylawName">{{bylaw[0]}}</td>
+                <td class="pad">{{bylaw[1]}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if meeting.motions|length > 0 %}
+            <h3>Motions</h3>
+            <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg"><div class="indent">
+            {% for motion in meeting.motions %}
+                <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg"><motion class="hoverable indent">
+                <strong>{{motion.result}}: </strong>
+                <motionDesc>{{motion.desc|safe}}</motionDesc>
+                </motion>
+            {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    </meeting>
+
+{% endfor %}
+</info>
+</body>
+</html>
