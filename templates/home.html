@@ -1,28 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{url_for('static', filename='fix.js')}}"></script>
-</head>
-<body>
-<sidebar>
-<img src="https://www.edmonton.ca/themes/coe_edmontonca/favicon.ico" width="80%" style="margin: 10%;">
-<a class="sidebar-button" href="/">Home</a>
-<a class="sidebar-button" href="/search">Search</a>
-<p style="margin-left: 15%; color: white; margin-block-end: 0.5em;">Years</p>
-{% for itemYear in years %}
-    <a class="sidebar-button" href="/year/{{itemYear}}">{{itemYear}}</a>
-{% endfor %}
-</sidebar>
+{% extends "layout.html" %}
 
-<info>
-    <div style="height:100%; overflow: auto;">
-        <h1>Unofficial Edmonton City Council Meeting Records</h1>
-    </div>
+{% block webTitle %}Home{% endblock %}
+
+{% block head %}{% endblock %}
+
+{% block title %}
+    <h1>Unofficial Edmonton City Council Meeting Records</h1>
+{% endblock %}
+
+{% block content %}
     <p>This website parses City Council meeting minutes from <a href="https://pub-edmonton.escribemeetings.com">https://pub-edmonton.escribemeetings.com</a></p>
-</info>
-
-</body>
-</html>
+{% endblock %}

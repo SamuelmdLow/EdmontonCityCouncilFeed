@@ -1,25 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% extends "layout.html" %}
+
+{% block webTitle %}Home{% endblock %}
+
+{% block head %}
     <script src="{{url_for('static', filename='script.js')}}"></script>
-</head>
-<body>
-<sidebar>
-<img src="https://www.edmonton.ca/themes/coe_edmontonca/favicon.ico" width="80%" style="margin: 10%;">
-<a class="sidebar-button" href="/">Home</a>
-<a class="sidebar-button" href="/search">Search</a>
-<p style="margin-left: 15%; color: white; margin-block-end: 0.5em;">Years</p>
-{% for itemYear in years %}
-    <a class="sidebar-button" href="/year/{{itemYear}}">{{itemYear}}</a>
-{% endfor %}
-</sidebar>
-<info>
-    <div style="height:100%; overflow: auto;">
+{% endblock %}
+
+{% block title %}
     <h1>{{title}}</h1>
-    </div>
+{% endblock %}
+
+{% block content %}
 {% for meeting in meetings %}
     <meeting>
     <a href="{{meeting.url}}"><h2>{{ meeting.name }}</h2></a>
@@ -61,6 +52,4 @@
     </meeting>
 
 {% endfor %}
-</info>
-</body>
-</html>
+{% endblock %}
