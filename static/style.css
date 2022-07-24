@@ -153,3 +153,18 @@ a.sidebar-button:hover {
 a.sidebar-button:active {
   color: white;
 }
+
+.fc-row
+{
+    height: 77px !important;
+}
+
+.fc-week
+{
+    height: 77px !important;
+}
+
+.fc-widget-content
+{
+    height: 77px !important;
+}

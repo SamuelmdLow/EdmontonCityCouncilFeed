@@ -517,6 +517,48 @@ def getAllYears():
 
     return years
 
+def searchForTerm(term):
+    global con, cur
+
+    meetings = []
+    rawMeetings = cur.execute("select * from meetings order by date desc").fetchall()
+    for rawMeeting in rawMeetings:
+
+        rawMotions = cur.execute("select movedBy, secondedBy, desc, inFavour, opposed, result, status from motions where ID=?", [rawMeeting[1], ]).fetchall()
+        rawAgendas = cur.execute("select * from agendas where ID=?", [rawMeeting[1], ]).fetchall()
+        rawBylaws = cur.execute("select * from bylaws where ID=?", [rawMeeting[1], ]).fetchall()
+
+        motions = []
+        for rawMotion in rawMotions:
+            if term.lower() in rawMotion[2].lower():
+                newMotion = motion()
+                newMotion.createFromDatabase(rawMotion)
+                motions.append(newMotion)
+
+        agendas = []
+        for rawAgenda in rawAgendas:
+            if term.lower() in rawAgenda[1].lower():
+                agendas.append(rawAgenda[1])
+
+        bylaws = []
+        for rawBylaw in rawBylaws:
+            if term.lower() in rawBylaw[2].lower():
+                bylaws.append(rawBylaw[1:])
+
+        if len(motions) > 0 or len(agendas) > 0 or len(bylaws) > 0:
+            newMeeting = Meeting()
+            newMeeting.createFromDatabase(rawMeeting)
+            newMeeting.motions = motions
+            newMeeting.agenda = agendas
+            newMeeting.bylaws = bylaws
+
+            meetings.append(newMeeting)
+        else:
+            print("ooped")
+            print(len(rawMotions))
+
+    return meetings
+
 def retrieveMeetingsFromDatabase(year):
     global con, cur
 

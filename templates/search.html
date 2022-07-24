@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{url_for('static', filename='fix.js')}}"></script>
+    <script src="{{url_for('static', filename='search.js')}}"></script>
 </head>
 <body>
 <sidebar>
@@ -19,9 +19,11 @@
 
 <info>
     <div style="height:100%; overflow: auto;">
-        <h1>Unofficial Edmonton City Council Meeting Records</h1>
+        <h1>Search</h1>
     </div>
-    <p>This website parses City Council meeting minutes from <a href="https://pub-edmonton.escribemeetings.com">https://pub-edmonton.escribemeetings.com</a></p>
+
+    <input type="text" id="input">
+    <input type="submit" id="submit" onclick="search()">
 </info>
 
 </body>
