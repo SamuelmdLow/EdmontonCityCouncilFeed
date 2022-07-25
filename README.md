@@ -80,7 +80,10 @@ Send requests for json files from their webserver
 ### Plan
 1. Figure it out 💀 
 
-## Goal 3
+## Goal 3 (met)
+Create the website
+
+## Goal 4
 Create an RSS feed for the information
 
 ## Goal 4
