@@ -642,20 +642,9 @@ def retrieveMeetingsFromDatabase(year):
 
     meetings = []
 
-    print(rawMeetings)
+    #print(rawMeetings)
 
     for raw in rawMeetings:
-
-        '''
-        movedBy text,
-        secondedBy text,
-        desc text,
-        inFavour integer,
-        opposed integer,
-        result text,
-        status integer'''
-
-        print(raw)
 
         newMeeting = Meeting()
         newMeeting.createFromDatabase(raw)

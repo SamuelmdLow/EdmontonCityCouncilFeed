@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block webTitle %}Home{% endblock %}
+{% block webTitle %}{{title}}{% endblock %}
 
 {% block head %}
     <script src="{{url_for('static', filename='script.js')}}"></script>
@@ -11,6 +11,9 @@
 {% endblock %}
 
 {% block content %}
+
+<p>Due to inconsistencies in the source, sometimes information will not be retrieved correctly.</p>
+
 {% for meeting in meetings %}
     <meeting>
     <a href="{{meeting.url}}"><h2>{{ meeting.name }}</h2></a>
@@ -26,7 +29,7 @@
                     <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/3/32/VisualEditor_-_Icon_-_Collapse.svg"><div class="pad hidden">
                     <ul>
                     {% for attachment in item[1] %}
-                        <li><a href="https://pub-edmonton.escribemeetings.com/{{attachment[1]}}">{{attachment[0]}}</a></li>
+                        <li class="attachment"><a href="https://pub-edmonton.escribemeetings.com/{{attachment[1]}}" target="_blank">{{attachment[0]}}</a></li>
                     {% endfor %}
                     </ul>
                     </div>
@@ -48,7 +51,7 @@
                     <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/3/32/VisualEditor_-_Icon_-_Collapse.svg"><div class="pad hidden">
                     <ul>
                     {% for attachment in bylaw[2] %}
-                        <li><a href="https://pub-edmonton.escribemeetings.com/{{attachment[1]}}">{{attachment[0]}}</a></li>
+                        <li class="attachment"><a href="https://pub-edmonton.escribemeetings.com/{{attachment[1]}}" target="_blank">{{attachment[0]}}</a></li>
                     {% endfor %}
                     </ul>
                     </div>
