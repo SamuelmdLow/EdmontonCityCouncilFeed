@@ -26,6 +26,5 @@ def retrieve(term):
     years = getAllYears()
     return render_template("meetings.html", meetings=meetings, title=term, years=years)
 
-
 if __name__ == "__main__":
    app.run(debug=True)

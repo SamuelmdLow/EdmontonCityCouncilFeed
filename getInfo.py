@@ -350,9 +350,20 @@ def splitAgenda(agenda):
     bylaws = []
     others = []
     for item in agenda:
+
         if item[0][0:6] == "Bylaw " or item[0][0:14] == "Charter Bylaw ":
-            bylaw = [item[0][:item[0].index(" - ")], item[0][item[0].index(" - ")+3:]]
-            print(bylaw)
+
+            if "-" in item[0]:
+                bylaw = [item[0][:item[0].index("-")-1], item[0][item[0].index("-")+2:]]
+            elif item[0][0:6] == "Bylaw ":
+                x = item[0][item[0].index(" ")+1:].index(" ")
+                bylaw = [item[0][:x], item[0][x:]]
+            elif item[0][0:14] == "Charter Bylaw ":
+                x = item[0][item[0][item[0].index(" ") + 1:].index(" ")+1:].index(" ")
+                bylaw = [item[0][:x], item[0][x:]]
+            else:
+                print(item[0])
+                bylaw = ["", item[0]]
             bylaw.append(item[1])
             bylaws.append(bylaw)
         else:
@@ -529,7 +540,7 @@ def getMeetings(startDate, endDate):
         newMeeting = Meeting()
         newMeeting.creteFromParse(meeting['MeetingName'], meeting['ID'], meeting['StartDate'])
         meetings.append(newMeeting)
-
+    print(len(meetings))
     i = 0
     while i < len(meetings):
         if len(meetings[i].agenda) == 0 and len(meetings[i].motions) == 0:
@@ -540,11 +551,16 @@ def getMeetings(startDate, endDate):
 
 def getAllMeetings():
     date = datetime.datetime.now()
-    startDate = "2022-01-01"
-    endDate = date.strftime("%Y") + "-" + date.strftime("%m") + "-" + date.strftime("%d")
 
-    meetings = getMeetings(startDate, endDate)
-    return meetings
+    year = 2005
+    while year < int(date.strftime("%Y")):
+        print(year)
+        newMeetings = getMeetings(str(year)+"-01-01", str(year+1)+"-01-01")
+        print(len(newMeetings))
+        for meeting in newMeetings:
+            uploadMeeting(meeting)
+
+        year = year + 1
 
 def getMonthMeetings():
     date = datetime.datetime.now()
@@ -590,15 +606,23 @@ def searchForTerm(term):
                 newMotion.createFromDatabase(rawMotion)
                 motions.append(newMotion)
 
+
+
+
         agendas = []
-        for rawAgenda in rawAgendas:
-            if term.lower() in rawAgenda[1].lower():
-                agendas.append(rawAgenda[1])
+        for rawItem in rawAgendas:
+            if term.lower() in rawItem[1].lower():
+                attachmentID = rawItem[2]
+                agendaAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [rawMeeting[1] + "A", attachmentID]).fetchall()
+                agendas.append([rawItem[1], agendaAttachments])
 
         bylaws = []
         for rawBylaw in rawBylaws:
             if term.lower() in rawBylaw[2].lower():
-                bylaws.append(rawBylaw[1:])
+                attachmentID = rawBylaw[3]
+                bylawAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [rawMeeting[1] + "B", attachmentID]).fetchall()
+                bylaws.append([rawBylaw[1], rawBylaw[2], bylawAttachments])
+
 
         if len(motions) > 0 or len(agendas) > 0 or len(bylaws) > 0:
             newMeeting = Meeting()
@@ -608,9 +632,6 @@ def searchForTerm(term):
             newMeeting.bylaws = bylaws
 
             meetings.append(newMeeting)
-        else:
-            print("ooped")
-            print(len(rawMotions))
 
     return meetings
 
@@ -644,7 +665,7 @@ def retrieveMeetingsFromDatabase(year):
 
 if FIRST_RUN == True:
     resetDatabase()
-    getMonthMeetings()
+    getAllMeetings()
 
 if __name__ == "__main__":
     pass
@@ -657,7 +678,7 @@ if __name__ == "__main__":
     #for meeting in meetings:
     #    uploadMeeting(meeting)
 
-    getMonthMeetings()
+    getAllMeetings()
 
     #getAllYears()
 
