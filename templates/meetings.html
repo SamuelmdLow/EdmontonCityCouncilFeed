@@ -20,7 +20,18 @@
         <h3>Agenda</h3>
         <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg"><ul class="indent">
             {% for item in meeting.agenda %}
-                <li class="pad hoverable">{{item}}</li>
+                <li class="pad hoverable">
+                    {{item[0]}}
+                    {% if item[1]|length > 0 %}
+                    <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/3/32/VisualEditor_-_Icon_-_Collapse.svg"><div class="pad hidden">
+                    <ul>
+                    {% for attachment in item[1] %}
+                        <li><a href="https://pub-edmonton.escribemeetings.com/{{attachment[1]}}">{{attachment[0]}}</a></li>
+                    {% endfor %}
+                    </ul>
+                    </div>
+                    {% endif %}
+                </li>
             {% endfor %}
         </ul>
         {% endif %}
@@ -31,7 +42,18 @@
             {% for bylaw in meeting.bylaws %}
             <tr class="hoverable">
                 <td class="pad bylawName">{{bylaw[0]}}</td>
-                <td class="pad">{{bylaw[1]}}</td>
+                <td class="pad">
+                    {{bylaw[1]}}
+                    {% if bylaw[2]|length > 0 %}
+                    <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/3/32/VisualEditor_-_Icon_-_Collapse.svg"><div class="pad hidden">
+                    <ul>
+                    {% for attachment in bylaw[2] %}
+                        <li><a href="https://pub-edmonton.escribemeetings.com/{{attachment[1]}}">{{attachment[0]}}</a></li>
+                    {% endfor %}
+                    </ul>
+                    </div>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </table>

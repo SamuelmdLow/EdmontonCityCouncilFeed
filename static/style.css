@@ -168,3 +168,8 @@ a.sidebar-button:active {
 {
     height: 77px !important;
 }
+
+li
+{
+    padding-top: 15px;
+}

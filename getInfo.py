@@ -31,14 +31,24 @@ def resetDatabase():
     cur.execute('''
     CREATE TABLE agendas(
         ID text,
-        text text
+        text text,
+        attachmentID integer
+    );''')
+
+    cur.execute('''
+    CREATE TABLE attachments(
+        meetingID text,
+        attachmentID integer,
+        name text,
+        link text 
     );''')
 
     cur.execute('''
     CREATE TABLE bylaws(
         ID text,
         name text,
-        text text
+        text text,
+        attachmentID integer
     );''')
 
     cur.execute('''
@@ -86,24 +96,50 @@ def uploadMeeting(meeting):
             (?,?,?,?,?)
         ;''', [meeting.name, meeting.ID, meeting.date, meeting.url, int(meeting.date[0:4])])
 
+        num = 0
         for item in meeting.agenda:
+
+            for attachment in item[1]:
+                cur.execute('''
+                INSERT INTO attachments
+                    (meetingID, attachmentID, name, link)
+                values
+                    (?,?,?,?)
+                ;''', [meeting.ID+"A", num, attachment[0], attachment[1]])
+
+
             cur.execute('''
             INSERT INTO agendas
-                (ID, text)
-            values
-                (?,?)
-            ;''', [meeting.ID, item])
-
-        for item in meeting.bylaws:
-            cur.execute('''
-            INSERT INTO bylaws
-                (ID, name, text)
+                (ID, text, attachmentID)
             values
                 (?,?,?)
-            ;''', [meeting.ID, item[0], item[1]])
+            ;''', [meeting.ID, item[0], num])
+
+            num = num + 1
+
+        num = 0
+        for item in meeting.bylaws:
+            #print(meeting.ID)
+            #print(item[2])
+            for attachment in item[2]:
+                #print(attachment)
+                cur.execute('''
+                INSERT INTO attachments
+                    (meetingID, attachmentID, name, link)
+                values
+                    (?,?,?,?)
+                ;''', [meeting.ID+"B", num, attachment[0], attachment[1]])
+
+            cur.execute('''
+            INSERT INTO bylaws
+                (ID, name, text, attachmentID)
+            values
+                (?,?,?,?)
+            ;''', [meeting.ID, item[0], item[1], num])
+
+            num = num + 1
 
         for motion in meeting.motions:
-
 
             inFavourID = cur.execute("select ID from groups where people=?", [motion.inFavour,]).fetchone()
             if inFavourID == None:
@@ -139,8 +175,6 @@ def uploadMeeting(meeting):
 
         con.commit()
 
-    else:
-        print("oops")
 filename = "file.txt"
 
 class Meeting():
@@ -165,11 +199,19 @@ class Meeting():
         #+ 'style="display:inline-block;" >'
         items = getElemValue("<DIV class='AgendaItemTitle' ", "</DIV>", html)
         for item in items:
-            self.agenda.append(cleanText(getElems(item)[0]))
+            num = getElemValue("SelectItem(", ");", item)[0]
+            rawAttachments = getElemValue("AgendaItemAttachment" + num, "</DIV>", html)
+            attachments = []
+            for attachment in rawAttachments:
+                link = getElemValue('href="', '" ', attachment)[0]
+                name = getElemValue("title='", "' ", attachment)[0]
+                attachments.append([name, link])
+
+            self.agenda.append([cleanText(getElems(item)[0]), attachments])
 
         terms = ["Budget and Planning Discussion - Verbal report", "Vote on Reports not Selected for Debate", "Reports to be Dealt with at a Different Meeting", "Explanation of Public Hearing Process", "Bylaws and Related Reports", "Call for Persons to Speak", "Call to Order", "Land Acknowledgement", "Roll Call", "Adoption of Agenda", "Requests for Specific Time on Agenda", "Approval of Minutes", "Items for Discussion and Related Business", "Vote on Bylaws not Selected for Debate", "Protocol Items", "Select Items for Debate", "Public Reports", "Requests to", "Councillor Inquiries", "Adjournment", "Motions Pending", "Private Reports", "Notices of Motion and Motions without Customary Notice"]
         self.agenda = filterInterest(self.agenda, terms, ["Bylaws"])
-
+        #print(self.agenda)
         self.bylaws, self.agenda = splitAgenda(self.agenda)
 
     def createFromDatabase(self, raw):
@@ -190,14 +232,18 @@ class Meeting():
             self.motions.append(newMotion)
 
         self.agenda = []
-        rawAgenda = cur.execute("select text from agendas where ID=?", [raw[1], ]).fetchall()
+        rawAgenda = cur.execute("select text, attachmentID from agendas where ID=?", [raw[1], ]).fetchall()
         for rawItem in rawAgenda:
-            self.agenda.append(rawItem[0])
+            attachmentID = rawItem[1]
+            agendaAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [raw[1] + "A", attachmentID]).fetchall()
+            self.agenda.append([rawItem[0], agendaAttachments])
 
         self.bylaws = []
-        rawBylaws = cur.execute("select name, text from bylaws where ID=?", [raw[1], ]).fetchall()
+        rawBylaws = cur.execute("select name, text, attachmentID from bylaws where ID=?", [raw[1], ]).fetchall()
         for rawBylaw in rawBylaws:
-            self.bylaws.append([rawBylaw[0], rawBylaw[1]])
+            attachmentID = rawBylaw[2]
+            bylawAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [raw[1] + "B", attachmentID]).fetchall()
+            self.bylaws.append([rawBylaw[0], rawBylaw[1], bylawAttachments])
 
     def output(self):
         print(self.name + " " + self.date)
@@ -304,8 +350,11 @@ def splitAgenda(agenda):
     bylaws = []
     others = []
     for item in agenda:
-        if item[0:6] == "Bylaw " or item[0:14] == "Charter Bylaw ":
-            bylaws.append(item.split(" - "))
+        if item[0][0:6] == "Bylaw " or item[0][0:14] == "Charter Bylaw ":
+            bylaw = [item[0][:item[0].index(" - ")], item[0][item[0].index(" - ")+3:]]
+            print(bylaw)
+            bylaw.append(item[1])
+            bylaws.append(bylaw)
         else:
             others.append(item)
 
@@ -380,13 +429,19 @@ def filterInterest(elems, boringTerms, boringLines):
     for elem in elems:
         #if "<strong>" in elem:
         #    print(elem)
+
+        if not isinstance(elem, str):
+            tested = elem[0]
+        else:
+            tested = elem
+
         good = True
         for term in boringTerms:
-            if term in elem:
+            if term in tested:
                 good = False
                 break
         for line in boringLines:
-            if line == elem:
+            if line == tested:
                 good = False
                 break
         if good == True:
@@ -592,7 +647,7 @@ if FIRST_RUN == True:
     getMonthMeetings()
 
 if __name__ == "__main__":
-
+    pass
     #file = open(filename, "w")
     #file.write(html)
     #file.close()
@@ -604,14 +659,14 @@ if __name__ == "__main__":
 
     getMonthMeetings()
 
-    getAllYears()
+    #getAllYears()
 
     #motions = parseMotions("https://pub-edmonton.escribemeetings.com/Meeting.aspx?Id=ed3fc862-3398-4e59-97d5-69e4e9aee352&Agenda=PostMinutes&lang=English")
 
     #for motion in motions:
     #    motion.output()
 
-    meetings = retrieveMeetingsFromDatabase(2022)
+    #meetings = retrieveMeetingsFromDatabase(2022)
 
-    for meeting in meetings:
-        meeting.output()
+    #for meeting in meetings:
+    #    meeting.output()
