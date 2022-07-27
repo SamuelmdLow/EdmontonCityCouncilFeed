@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <title>{% block webTitle %}{% endblock %} - Unofficial Yeg Records</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='yegRecords_icon.svg') }}">
+    <meta property="og:image" content="{{ url_for('static', filename='yegRecords_icon.svg') }}" />
+    <meta property="og:description" content="Website for viewing and searching Edmonton City Council meeting records" />
   {% block head %}{% endblock %}
 </head>
 <body>
 
 <sidebar>
-    <img src="https://www.edmonton.ca/themes/coe_edmontonca/favicon.ico" width="80%" style="margin: 10%;">
+    <img src="{{ url_for('static', filename='yegRecords_icon.svg') }}" width="80%" style="margin: 10%;">
     <a class="sidebar-button" href="/">Home</a>
     <a class="sidebar-button" href="/search">Search</a>
     <a class="sidebar-button" href="/rss/all">RSS</a>
