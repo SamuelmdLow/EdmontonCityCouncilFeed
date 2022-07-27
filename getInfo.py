@@ -286,8 +286,8 @@ class motion():
         self.movedBy = data[0]
         self.secondedBy = data[1]
         self.desc = data[2]
-        self.inFavour = cur.execute("select people from groups where ID = ?", [data[3],])
-        self.opposed = cur.execute("select people from groups where ID = ?", [data[4],])
+        self.inFavour = cur.execute("select people from groups where ID = ?", [data[3], ]).fetchone()[0]
+        self.opposed = cur.execute("select people from groups where ID = ?", [data[4], ]).fetchone()[0]
         self.result = data[5]
         if data[6] == 1:
             self.status = True
@@ -322,7 +322,7 @@ class motion():
                 if "In Favour" in votes[0][0]:
                     self.inFavour = cleanText(votes[0][1])
                 elif "Opposed" in votes[0][0]:
-                    self.inFavour = cleanText(votes[0][1])
+                    self.opposed = cleanText(votes[0][1])
                 votes.pop(0)
 
         if "MotionResult" in info:
@@ -552,8 +552,8 @@ def getMeetings(startDate, endDate):
 def getAllMeetings():
     date = datetime.datetime.now()
 
-    year = 2005
-    while year < int(date.strftime("%Y")):
+    year = 2020
+    while year < int(date.strftime("%Y")) + 1:
         print(year)
         newMeetings = getMeetings(str(year)+"-01-01", str(year+1)+"-01-01")
         print(len(newMeetings))
@@ -588,7 +588,7 @@ def getAllYears():
 
     return years
 
-def searchForTerm(term):
+def searchForTerm(terms):
     global con, cur
 
     meetings = []
@@ -601,28 +601,30 @@ def searchForTerm(term):
 
         motions = []
         for rawMotion in rawMotions:
-            if term.lower() in rawMotion[2].lower():
-                newMotion = motion()
-                newMotion.createFromDatabase(rawMotion)
-                motions.append(newMotion)
-
-
-
+            for term in terms:
+                if term.lower() in rawMotion[2].lower():
+                    newMotion = motion()
+                    newMotion.createFromDatabase(rawMotion)
+                    motions.append(newMotion)
+                    break
 
         agendas = []
         for rawItem in rawAgendas:
-            if term.lower() in rawItem[1].lower():
-                attachmentID = rawItem[2]
-                agendaAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [rawMeeting[1] + "A", attachmentID]).fetchall()
-                agendas.append([rawItem[1], agendaAttachments])
+            for term in terms:
+                if term.lower() in rawItem[1].lower():
+                    attachmentID = rawItem[2]
+                    agendaAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [rawMeeting[1] + "A", attachmentID]).fetchall()
+                    agendas.append([rawItem[1], agendaAttachments])
+                    break
 
         bylaws = []
         for rawBylaw in rawBylaws:
-            if term.lower() in rawBylaw[2].lower():
-                attachmentID = rawBylaw[3]
-                bylawAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [rawMeeting[1] + "B", attachmentID]).fetchall()
-                bylaws.append([rawBylaw[1], rawBylaw[2], bylawAttachments])
-
+            for term in terms:
+                if term.lower() in rawBylaw[2].lower():
+                    attachmentID = rawBylaw[3]
+                    bylawAttachments = cur.execute("select name, link from attachments where meetingID=? and attachmentID=?", [rawMeeting[1] + "B", attachmentID]).fetchall()
+                    bylaws.append([rawBylaw[1], rawBylaw[2], bylawAttachments])
+                    break
 
         if len(motions) > 0 or len(agendas) > 0 or len(bylaws) > 0:
             newMeeting = Meeting()
@@ -651,6 +653,52 @@ def retrieveMeetingsFromDatabase(year):
         meetings.append(newMeeting)
 
     return meetings
+
+def arrangeRss(meetings):
+    items = ""
+    for meeting in meetings:
+        description = ""
+
+        if len(meeting.agenda) > 0:
+            description += "<h3>Agenda</h3>"
+            for item in meeting.agenda:
+                description += item[0]
+                if len(item[1]) > 0:
+                    description += "<ul>"
+                    for attachment in item[1]:
+                        description += '<li class="attachment"><a href="https://pub-edmonton.escribemeetings.com/' + attachment[1]+ '" target="_blank">' + attachment[0] + '</a></li>'
+                    description += "</ul>"
+
+        if len(meeting.bylaws) > 0:
+            description += "<h3>Bylaws</h3>"
+            description += "<table>"
+            for bylaw in meeting.bylaws:
+                description += "<tr><td>" + bylaw[0] + "</td><td>" + bylaw[1]
+                if len(bylaw[2]) > 0:
+                    description += "<ul>"
+                    for attachment in bylaw[2]:
+                        description += '<li class="attachment"><a href="https://pub-edmonton.escribemeetings.com/' + attachment[1]+ '" target="_blank">' + attachment[0] + '</a></li>'
+                    description += "</ul>"
+                description += "</td>"
+            description += "</table>"
+
+        if len(meeting.motions) > 0:
+            description += "<h3>Motions</h3><ul>"
+
+            for motion in meeting.motions:
+                description += "<li><p>" + motion.result + "</p><ul><li>In Favour:" + motion.inFavour + "</li><li>Opposed:" + motion.opposed + "</li></ul><p>" + motion.desc + "</p></li>"
+            description += "</ul>"
+
+
+        items += '''<item>
+        <title><![CDATA[''' + meeting.name + ''']]></title>
+        <link><![CDATA[''' + meeting.url + ''']]></link>
+        <pubDate><![CDATA[''' + meeting.date + ''']]></pubDate>
+
+        <description><![CDATA[''' + description + ''']]></description>
+        </item>'''
+
+    return items
 
 if FIRST_RUN == True:
     resetDatabase()

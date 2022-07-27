@@ -14,6 +14,8 @@
 
 <p>Due to inconsistencies in the source, sometimes information will not be retrieved correctly.</p>
 
+<p>Rss feed: <a href="/rss/{{rss}}"><span><img height="15px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Generic_Feed-icon.svg/512px-Generic_Feed-icon.svg.png?20120905025810"></span></a></p>
+
 {% for meeting in meetings %}
     <meeting>
     <a href="{{meeting.url}}"><h2>{{ meeting.name }}</h2></a>
@@ -68,6 +70,10 @@
             {% for motion in meeting.motions %}
                 <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/VisualEditor_-_Icon_-_Expand.svg"><motion class="hoverable indent">
                 <strong>{{motion.result}}: </strong>
+                <img class="expandButton" onclick="toggle(this);" src="https://upload.wikimedia.org/wikipedia/commons/3/32/VisualEditor_-_Icon_-_Collapse.svg"><div class="indent hidden">
+                    <p><strong>In Favour:</strong> {{motion.inFavour}}</p>
+                    <p><strong>Opposed:</strong> {{motion.opposed}}</p>
+                </div>
                 <motionDesc>{{motion.desc|safe}}</motionDesc>
                 </motion>
             {% endfor %}
