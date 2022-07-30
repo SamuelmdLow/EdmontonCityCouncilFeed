@@ -83,7 +83,7 @@ Send requests for json files from their webserver
 ## Goal 3 (met)
 Create the website
 
-## Goal 4
+## Goal 4 (met)
 Create an RSS feed for the information
 
 ## Goal 4
