@@ -5,31 +5,39 @@
     <title>{% block webTitle %}{% endblock %} - Unofficial Yeg Records</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='yegRecords_icon.svg') }}">
-    <meta property="og:image" content="{{ url_for('static', filename='yegRecords_icon.svg') }}" />
-    <meta property="og:description" content="Website for viewing and searching Edmonton City Council meeting records" />
+    <meta property="og:image" content="https://cdn.glitch.global/d13133a9-0569-4eb3-83ae-b143dd8c47f4/yegRecords_png.png?v=1658969147090">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="300">
+    <meta property="og:image:height" content="300">
+    <meta property="og:image:alt" content="The Yeg Records logo">
+    <meta property="og:description" content="Website for viewing and searching Edmonton City Council meeting records" >
+    <meta name="keywords" content="Edmonton, Yeg Records, Edmonton City Council, Meeting minutes">
+    <meta name="descriptions" content="Website for viewing and searching Edmonton City Council meeting records">
+    <meta property="og:type" content="website">
+    <meta name="author" content="Samuel Low">
   {% block head %}{% endblock %}
 </head>
 <body>
 
-<sidebar>
-    <img src="{{ url_for('static', filename='yegRecords_icon.svg') }}" width="80%" style="margin: 10%;">
+<div class="sidebar">
+    <img id="logo" src="{{ url_for('static', filename='yegRecords_icon.svg') }}" width="80%" style="margin: 10%;">
     <a class="sidebar-button" href="/">Home</a>
     <a class="sidebar-button" href="/search">Search</a>
     <a class="sidebar-button" href="/rss/all">RSS</a>
-    <p style="margin-left: 15%; color: white; margin-block-end: 0.5em;">Years</p>
+    <p id="years">Years</p>
     {% for itemYear in years %}
         <a class="sidebar-button" href="/year/{{itemYear}}">{{itemYear}}</a>
     {% endfor %}
-</sidebar>
+</div>
 
-<info>
+<div class="info">
     <div style="height:100%; overflow: auto;">
         {% block title %}{% endblock %}
     </div>
 
     {% block content %}{% endblock %}
 
-</info>
+</div>
 
 </body>
 </html>

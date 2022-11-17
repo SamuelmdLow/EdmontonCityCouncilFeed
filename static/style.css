@@ -1,6 +1,8 @@
 body
 {
     margin: 0;
+    width: 100vw;
+    height: 100vh;
 }
 
 meeting
@@ -97,21 +99,30 @@ a:active {
   color: black;
 }
 
-sidebar
+.sidebar
 {
     position: fixed;
     width: 125px;
     height: 120vh;
     overflow: auto;
     background-color: #003E7E;
+    display: block;
+    font-size: 2.5vh;
 }
 
-info
+.info
 {
     max-width: 700px;
     padding-left: 150px;
     padding-right: 25px;
     display: block;
+}
+
+#years
+{
+  margin-left: 15%;
+  color: white;
+  margin-block-end: 0.5em;
 }
 
 .sidebar-button
@@ -125,6 +136,45 @@ info
     width: 70%;
     text-align: center;
     display: block;
+}
+
+@media only screen and (max-width: 1000px) {
+  .sidebar
+  {
+    width: 100vw;
+    height: 75px;
+    position: static;
+    padding-top: 5%;
+    overflow-x: scroll;
+    overflow-y: clip;
+    padding-left: 2%;
+  }
+
+  #logo
+  {
+    display:none;
+  }
+
+  .sidebar-button
+  {
+    width: auto;
+    text-align: center;
+    display: inline;
+    margin: 1%;
+  }
+
+  #years
+  {
+    display: inline;
+    margin: 1%;
+  }
+
+  .info
+  {
+    padding: 0;
+    margin: 2%;
+    overflow-wrap: break-word;
+  }
 }
 
 .sidebar-button:hover
