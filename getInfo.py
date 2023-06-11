@@ -780,6 +780,17 @@ def arrangeRss(meetings):
 
     return items
 
+def pagify(meetings, max=15):
+    if len(meetings) < max:
+        pagify = meetings
+    else:
+        pagify = []
+        p=0
+        while p < len(meetings)/max:
+            pagify.append(meetings[p*max:(p+1)*max])
+            p = p + 1
+
+    return pagify
 
 if FIRST_RUN == True:
     resetDatabase()

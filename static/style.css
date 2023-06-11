@@ -223,3 +223,7 @@ li.attachment
 {
     padding-top: 15px;
 }
+
+form{
+    display: inline-block;
+}

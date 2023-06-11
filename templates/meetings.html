@@ -13,6 +13,31 @@
 
 {% block content %}
 
+<p>Current page: {{pageNum}}</p>
+<form>
+<input type="hidden" name="page" value="1">
+<input type="submit" value="1">
+</form>
+
+{% if pageNum != 1 %}
+<form>
+<input type="hidden" name="page" value="{{pageNum - 1}}">
+<input type="submit" value="<">
+</form>
+{% endif %}
+
+{% if pageNum != pageCount %}
+<form>
+<input type="hidden" name="page" value="{{pageNum + 1}}">
+<input type="submit" value=">">
+</form>
+{% endif %}
+
+<form>
+<input type="hidden" name="page" value="{{pageCount}}">
+<input type="submit" value="{{pageCount}}">
+</form>
+
 <p>Due to inconsistencies in the source, sometimes information will not be retrieved correctly.</p>
 
 <p>Rss feed: <a href="/rss/{{rss}}"><span><img height="15px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Generic_Feed-icon.svg/512px-Generic_Feed-icon.svg.png?20120905025810"></span></a></p>

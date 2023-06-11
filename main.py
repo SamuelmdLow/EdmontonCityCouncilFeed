@@ -1,4 +1,4 @@
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 from getInfo import *
 
 app = Flask(__name__)
@@ -10,12 +10,20 @@ def index():
     return render_template("home.html", years=years)
 
 
+meetingsPerPage = 15
+
 @app.route("/year/<year>")
 def year(year):
     meetings = retrieveMeetingsFromDatabase(int(year))
     years = getAllYears()
+
+    pages = pagify(meetings)
+    page = int(request.args.get("page", 1))
+
+    pageMeetings = pages[page-1]
+
     print(years)
-    return render_template("meetings.html", meetings=meetings, title=year, years=years, rss="all")
+    return render_template("meetings.html", meetings=pageMeetings, pageNum=page, pageCount=len(pages), title=year, years=years, rss="all")
 
 
 @app.route("/search")
@@ -29,7 +37,13 @@ def retrieve(strterms):
     terms = strterms.split(",")
     meetings = searchForTerm(terms)
     years = getAllYears()
-    return render_template("meetings.html", meetings=meetings, title="Terms: " + strterms, years=years, rss=strterms)
+
+    pages = pagify(meetings)
+    page = int(request.args.get("page", 1))
+
+    pageMeetings = pages[page-1]
+
+    return render_template("meetings.html", meetings=pageMeetings, pageNum=page, pageCount=len(pages), title="Terms: " + strterms, years=years, rss=strterms)
 
 
 @app.route("/updateMonth")
