@@ -86,5 +86,5 @@ Create the website
 ## Goal 4 (met)
 Create an RSS feed for the information
 
-## Goal 4
-Create a twitter bot for the information
+## Goal 5 (met)
+Create a mastodon bot for the information
