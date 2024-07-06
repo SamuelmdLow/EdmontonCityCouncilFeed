@@ -1,5 +1,4 @@
 import json
-import urllib
 import requests
 from bs4 import BeautifulSoup
 import datetime
@@ -384,7 +383,9 @@ def splitAgenda(agenda):
 
 
 def getHtml(url):
-    fp = urllib.urlopen(url)
+    from urllib.request import urlopen, Request
+    req = Request(url, headers={'User-Agent': "Sam Low's Yeg Records https://www.tubbdoose.com/yegrecords"})
+    fp = urlopen(req)
     mybytes = fp.read()
     html = mybytes.decode("utf8")
     fp.close()
